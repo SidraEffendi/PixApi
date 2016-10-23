@@ -66,7 +66,7 @@ class Photos(Base):
             'photo_code_id': self.photo_code_id,
         }
 
-engine = create_engine('postgresql+psycopg2://postgres:XxxAahSn@2*5@localhost/pixtest')
+engine = create_engine('postgresql+psycopg2://pixliapp:pixli1234@pixtest2.cergfrcu9ucr.us-east-1.rds.amazonaws.com:5432/pixlitest3')
 
 
 Base.metadata.create_all(engine)

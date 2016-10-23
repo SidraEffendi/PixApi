@@ -6,7 +6,7 @@ from pixdb_setup import Photos, Events, Base
 
 app = Flask(__name__)
 
-engine = create_engine('postgresql+psycopg2://postgres:XxxAahSn@2*5@localhost/pixtest')
+engine = create_engine('postgresql+psycopg2://pixliapp:pixli1234@pixtest2.cergfrcu9ucr.us-east-1.rds.amazonaws.com:5432/pixlitest3')
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
@@ -17,6 +17,11 @@ session = DBSession()
 def dataJSON_get():
     items = session.query(Events).all()
     return jsonify(Events=[i.serialize for i in items])
+
+@app.route('/pixget/photos')
+def dataJSON_getPhoto():
+    items = session.query(Photos).all()
+    return jsonify(Photos=[i.serialize for i in items])
 
 @app.route('/pixpost/new', methods = ['GET', 'POST'])
 def dataJSON_post():
