@@ -6,7 +6,7 @@ from pixdb_setup import Photos, Events, Base
 
 app = Flask(__name__)
 
-engine = create_engine('postgresql+psycopg2://pixliapp:pixli1234@pixtest2.cergfrcu9ucr.us-east-1.rds.amazonaws.com:5432/pixlitest3')
+engine = create_engine('postgresql+psycopg2://postgres:XxxAahSn@2*5@localhost/pixtest')
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
@@ -18,12 +18,16 @@ def dataJSON_get():
     items = session.query(Events).all()
     return jsonify(Events=[i.serialize for i in items])
 
-@app.route('/pixget/photos')
-def dataJSON_getPhoto():
-    items = session.query(Photos).all()
-    return jsonify(Photos=[i.serialize for i in items])
+@app.route('/pixget/<event_id>')
+def dataJSON_getEventCheck(event_id):
+	event_e = session.query(Events).filter_by(code_id=event_id)
+	if event_e is not None:
+		checked = 1
+		return str(checked)
+	else:	
+		return 
 
-@app.route('/pixpost/new', methods = ['GET', 'POST'])
+@app.route('/pixpost/events', methods = ['GET', 'POST'])
 def dataJSON_post():
 	if request.method == 'GET':
     # RETURN ALL DATA IN DATABASE
@@ -39,6 +43,39 @@ def dataJSON_post():
 		session.commit()
 		items = session.query(Events).all()
 		return jsonify(Events=[i.serialize for i in items])
+
+@app.route('/pixget/photos/<event_id>')
+def dataJSON_getPhotoCount(event_id):
+	#event = session.query(Events).filter_by(code_id=event_id).one()
+	photos_e = session.query(Photos).filter_by(photo_code_id=event_id)
+	tempo = photos_e.count()
+	if tempo == 0:
+		return
+	else:	
+		return str(photos_e.count())
+    #items = session.query(Photos).all()
+    #return jsonify(Photos=[i.serialize for i in items])
+
+@app.route('/pixpost/photos/<event_id>', methods = ['GET', 'POST'])
+def dataJSON_postPhotos(event_id):
+	if request.method == 'GET':
+    # RETURN ALL DATA IN DATABASE
+		event = session.query(Events).filter_by(code_id=event_id).one()
+		photos_e = session.query(Photos).filter_by(photo_code_id=event.code_id)
+		return jsonify(Photos=[i.serialize for i in photos_e])
+		#return str(photos_e.count())
+
+	elif request.method == 'POST':
+    # MAKE A NEW DATA COLUMN AND STORE IT IN DATABASE
+        #if request.headers['Content-Type'] == 'application/json':
+		photo1 = Photos(photo_code_id = event_id, image_url = request.json["image_url"])
+		session.add(photo1)
+		session.commit()
+		event = session.query(Events).filter_by(code_id=event_id).one()
+		photos_e = session.query(Photos).filter_by(photo_code_id=event.code_id)
+		return jsonify(Photos=[i.serialize for i in photos_e])
+		#items = session.query(Photos).all()
+    	#return jsonify(Photos=[i.serialize for i in items])
 
 if __name__ == '__main__':
     app.debug = True
